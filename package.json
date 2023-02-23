@@ -1,5 +1,5 @@
 {
-  "name": "solid-storedb",
+  "name": "solid-db",
   "version": "0.0.3",
   "description": "It is like a NoSQL DB at the frontend side, but reactive. It uses Solid.js store inside to keep data.",
   "keywords": [
