@@ -1,0 +1,33 @@
+{
+  "name": "solid-storedb",
+  "version": "0.0.3",
+  "description": "Node.js pretty and fast TTY logger with nice settings",
+  "keywords": [
+    "solidjs",
+    "store",
+    "db",
+    "reactive",
+    "database"
+  ],
+  "author": "Max Shane <wellloy1@gmail.com>",
+  "license": "MIT",
+  "main": "./index.js",
+  "scripts": {
+    "demo": "nodemon ./example/demo.js"
+  },
+  "types": "index.d.ts",
+  "files": [
+    "lib/",
+    "example/",
+    "index.js"
+  ],
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wellloy1/solid-storedb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wellloy1/solid-storedb/issues",
+    "email": "wellloy1@gmail.com"
+  }
+}
