@@ -24,10 +24,10 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wellloy1/solid-storedb.git"
+    "url": "https://github.com/wellloy1/solid-db.git"
   },
   "bugs": {
-    "url": "https://github.com/wellloy1/solid-storedb/issues",
+    "url": "https://github.com/wellloy1/solid-db/issues",
     "email": "wellloy1@gmail.com"
   }
 }
