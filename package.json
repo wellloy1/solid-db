@@ -1,7 +1,7 @@
 {
   "name": "solid-storedb",
   "version": "0.0.3",
-  "description": "Node.js pretty and fast TTY logger with nice settings",
+  "description": "It is like a NoSQL DB at the frontend side, but reactive. It uses Solid.js store inside to keep data.",
   "keywords": [
     "solidjs",
     "store",
