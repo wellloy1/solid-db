@@ -14,7 +14,7 @@
     "main": "./index.js",
     "scripts": {
         "demo": "nodemon ./example/demo.js",
-        "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
+        "test": "clear && node --experimental-vm-modules ./node_modules/.bin/jest"
     },
     "types": "./types",
     "files": [

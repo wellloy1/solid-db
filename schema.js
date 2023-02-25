@@ -8,11 +8,12 @@ const data = {
 };
 
 export const schema = {
-    id: SB.string,
-    age: SB.number,
+    id: SB.number.fn(Date.now),
     registered: SB.boolean,
-
-    // data: SB.object.props(data),
+    comment: SB.string.default("No comment"),
+    data: SB.object.props({
+        id: SB.number.fn(Date.now),
+    }),
 };
 
-// console.log(schema);
+console.log(schema);

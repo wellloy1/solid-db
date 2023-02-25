@@ -1,3 +1,5 @@
+import { errorMessage } from "./errorMessage.js";
+
 class SchemaError extends Error {
     constructor(message) {
         super();
@@ -38,21 +40,100 @@ export class SB {
     }
 }
 
-const createExtendedNumberProto = (result) => ({
+const createExtendedNumberProto = (result) => ({});
+
+const createCommonProto = (result) => ({
+    null() {
+        if (Object.hasOwn(result, "_null")) {
+            throw new SchemaError(errorMessage.for.null.when.alreadyAdded);
+        }
+        if (Object.hasOwn(result, "_default")) {
+            throw new SchemaError(errorMessage.for.null.when.defaultAdded);
+        }
+        return Object.assign(result, { _null: true });
+    },
+
+    default(value = null) {
+        if (Object.hasOwn(result, "_default")) {
+            throw new SchemaError(errorMessage.for.default.when.alreadyAdded);
+        }
+        if (Object.hasOwn(result, "_null")) {
+            throw new SchemaError(errorMessage.for.default.when.nullAdded);
+        }
+        if (result.type !== typeof value && value !== null) {
+            throw new SchemaError(errorMessage.for.default.when.invalidValue);
+        }
+        return Object.assign(result, { _default: value });
+    },
+
+    fn(func) {
+        if (func === undefined) {
+            throw new SchemaError(errorMessage.for.fn.when.undefinedValue);
+        }
+        if (Object.hasOwn(result, "_fn")) {
+            throw new SchemaError(errorMessage.for.fn.when.alreadyAdded);
+        }
+        if (typeof func !== "function") {
+            throw new SchemaError(errorMessage.for.fn.when.invalidValue);
+        }
+        return Object.assign(result, { _fn: (v) => func(v) });
+    },
+
+    rule(func) {
+        if (func === undefined) {
+            throw new SchemaError(errorMessage.for.rule.when.undefinedValue);
+        }
+        if (Object.hasOwn(result, "_rule")) {
+            throw new SchemaError(errorMessage.for.rule.when.alreadyAdded);
+        }
+        if (typeof func !== "function") {
+            throw new SchemaError(errorMessage.for.rule.when.invalidValue);
+        }
+        return Object.assign(result, { _rule: (v) => func(v) });
+    },
+    regexp(exp) {
+        if (exp === undefined) {
+            throw new SchemaError(errorMessage.for.regexp.when.undefinedValue);
+        }
+        if (result.type !== "string") {
+            throw new SchemaError(errorMessage.for.regexp.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_regexp")) {
+            throw new SchemaError(errorMessage.for.regexp.when.alreadyAdded);
+        }
+        function isRegExpValid(exp) {
+            try {
+                new RegExp(exp);
+            } catch (e) {
+                throw new SchemaError(
+                    errorMessage.for.regexp.when.invalidValue
+                );
+            }
+        }
+        isRegExpValid(exp);
+        return Object.assign(result, { _regexp: exp });
+    },
+    toggle() {
+        if (result.type !== "boolean") {
+            throw new SchemaError(errorMessage.for.toggle.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_toggle")) {
+            throw new SchemaError(errorMessage.for.toggle.when.alreadyAdded);
+        }
+        return Object.assign(result, { _toggle: true });
+    },
     increment() {
         if (result.type !== "number" && result.type !== "bigint") {
             throw new SchemaError(
-                `The 'increment' option is applicable for the 'number' or 'bigint' type.`
+                errorMessage.for.increment.when.notApplicable
             );
         }
         if (Object.hasOwn(result, "_increment")) {
-            throw new SchemaError(
-                `You have been already added an 'increment' option.`
-            );
+            throw new SchemaError(errorMessage.for.increment.when.alreadyAdded);
         }
         if (Object.hasOwn(result, "_decrement")) {
             throw new SchemaError(
-                `You have specified a 'decrement' option. You cannot use "increment" and "decrement" together.`
+                errorMessage.for.increment.when.decrementAdded
             );
         }
         return Object.assign(result, { _increment: true });
@@ -60,164 +141,91 @@ const createExtendedNumberProto = (result) => ({
     decrement() {
         if (result.type !== "number" && result.type !== "bigint") {
             throw new SchemaError(
-                `The 'decrement' option is applicable for the 'number' or 'bigint' type.`
+                errorMessage.for.decrement.when.notApplicable
             );
         }
         if (Object.hasOwn(result, "_decrement")) {
-            throw new SchemaError(
-                `You have been already added an 'increment' option.`
-            );
+            throw new SchemaError(errorMessage.for.decrement.when.alreadyAdded);
         }
         if (Object.hasOwn(result, "_increment")) {
             throw new SchemaError(
-                `You have specified a 'decrement' option. You cannot use "increment" and "decrement" together.`
+                errorMessage.for.decrement.when.incrementAdded
             );
         }
         return Object.assign(result, { _decrement: true });
     },
-});
-
-const createCommonProto = (result) => ({
-    null() {
-        if (Object.hasOwn(result, "_null")) {
-            throw new SchemaError(
-                `You have been already added a 'null' option`
-            );
-        }
-        if (Object.hasOwn(result, "_default")) {
-            throw new SchemaError(
-                `You have specified a 'default' option. You don't need to use "default" and "null" together.`
-            );
-        }
-        return Object.assign(result, { _null: true });
-    },
-
-    default(value = null) {
-        if (Object.hasOwn(result, "_default")) {
-            throw new SchemaError(
-                `You have been already added a 'default' option.`
-            );
-        }
-        if (Object.hasOwn(result, "_null")) {
-            throw new SchemaError(
-                `You have specified a 'null' option. You cannot use "default" and "null" together.`
-            );
-        }
-        if (result.type !== typeof value && value !== null) {
-            throw new SchemaError(
-                `Type of the value passed to 'default' option doesn't match the 'type'.`
-            );
-        }
-        return Object.assign(result, { _default: value });
-    },
-
-    fn(func = (v) => null) {
-        if (Object.hasOwn(result, "_fn")) {
-            throw new SchemaError(`You have been already added a 'fn' option.`);
-        }
-        return Object.assign(result, { _fn: (v) => func(v) });
-    },
-
-    rule(func = (v) => true) {
-        if (Object.hasOwn(result, "_rule")) {
-            throw new SchemaError(
-                `You have been already added an 'rule' option.`
-            );
-        }
-        return Object.assign(result, { _rule: (v) => func(v) });
-    },
-});
-
-const createStringProto = (result) => ({
-    ...createCommonProto(result),
-    regexp(exp) {
-        if (result.type !== "string") {
-            throw new SchemaError(
-                `The 'regexp' option is applicable for the 'string' type.`
-            );
-        }
-        if (Object.hasOwn(result, "_regexp")) {
-            throw new SchemaError(
-                `You have been already added an 'regexp' option.`
-            );
-        }
-        return Object.assign(result, { _regexp: exp });
-    },
-});
-
-const createNumberProto = (result) => ({
-    ...createCommonProto(result),
-    ...createExtendedNumberProto(result),
-});
-
-const createBigintProto = (result) => ({
-    ...createCommonProto(result),
-    ...createExtendedNumberProto(result),
-});
-
-const createBooleanProto = (result) => ({
-    ...createCommonProto(result),
-    toggle() {
-        if (result.type !== "boolean") {
-            throw new SchemaError(
-                `The 'toggle' option is applicable for the 'boolean' type.`
-            );
-        }
-        if (Object.hasOwn(result, "_toggle")) {
-            throw new SchemaError(
-                `You have been already added an 'regexp' option.`
-            );
-        }
-        return Object.assign(result, { _toggle: true });
-    },
-});
-
-const createObjectProto = (result) => ({
-    ...createCommonProto(result),
-    props(obj = {}) {
+    props(obj) {
         if (result.type !== "object") {
-            throw new SchemaError(
-                `The 'props' option is applicable for the 'object' type only.`
-            );
+            throw new SchemaError(errorMessage.for.props.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_props")) {
+            throw new SchemaError(errorMessage.for.props.when.alreadyAdded);
         }
         if (obj === undefined) {
-            throw new SchemaError(
-                `If you are using the 'props' option, you should specify its properties schema.`
-            );
+            throw new SchemaError(errorMessage.for.props.when.undefinedValue);
         }
-        if (obj === null || typeof obj !== "object") {
-            throw new SchemaError(
-                `The 'props' option must be a type of 'object'.`
-            );
+        if (
+            obj === null ||
+            typeof obj !== "object" ||
+            Object.keys(obj).length === 0
+        ) {
+            throw new SchemaError(errorMessage.for.props.when.invalidValue);
         }
         return Object.assign(result, { _props: obj });
     },
-});
 
-const createArrayProto = (result) => ({
-    ...createCommonProto(result),
     items(item) {
         if (result.type !== "array") {
-            throw new SchemaError(
-                `The 'items' option is applicable for the 'array' type.`
-            );
+            throw new SchemaError(errorMessage.for.items.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_items")) {
+            throw new SchemaError(errorMessage.for.items.when.alreadyAdded);
         }
         if (item === undefined) {
-            throw new SchemaError(
-                `If you are using the 'items' option, you should specify its element schema.`
-            );
+            throw new SchemaError(errorMessage.for.items.when.undefinedValue);
+        }
+        if (
+            item === null ||
+            typeof item !== "object" ||
+            Object.keys(item).length === 0
+        ) {
+            throw new SchemaError(errorMessage.for.items.when.invalidValue);
         }
         return Object.assign(result, { _items: item });
     },
 });
 
+const createStringProto = (result) => ({
+    ...createCommonProto(result),
+});
+
+const createNumberProto = (result) => ({
+    ...createCommonProto(result),
+});
+
+const createBigintProto = (result) => ({
+    ...createCommonProto(result),
+});
+
+const createBooleanProto = (result) => ({
+    ...createCommonProto(result),
+});
+
+const createObjectProto = (result) => ({
+    ...createCommonProto(result),
+});
+
+const createArrayProto = (result) => ({
+    ...createCommonProto(result),
+});
+
 const protos = {
-    string: createStringProto,
-    number: createNumberProto,
-    bigint: createBigintProto,
-    boolean: createBooleanProto,
-    object: createObjectProto,
-    array: createArrayProto,
+    string: createCommonProto,
+    number: createCommonProto,
+    bigint: createCommonProto,
+    boolean: createCommonProto,
+    object: createCommonProto,
+    array: createCommonProto,
 };
 
 function createProto(type, result) {
@@ -242,3 +250,12 @@ function createProto(type, result) {
 // console.log(SB.boolean.toggle());
 // console.log(SB.boolean.null());
 // console.log(SB.boolean.default().fn());
+
+// ![
+//     "string",
+//     "number",
+//     "boolean",
+//     "bigint",
+//     "object",
+//     "array",
+// ].includes(obj.type)
