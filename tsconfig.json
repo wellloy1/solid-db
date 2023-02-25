@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "target": "ESNext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "baseUrl": ".",
+        "preserveWatchOutput": true,
+        "skipLibCheck": true
+        // "typeRoots": ["./types"]
+    },
+    "include": ["./schema.js", "./sb.js", "./types/*.ts"]
+}
