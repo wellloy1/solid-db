@@ -13,34 +13,84 @@ class SchemaError extends Error {
     }
 }
 
-export class SB {
-    constructor(type) {
-        this.result = { type };
-        this.result.__proto__ = createProto(type, this.result);
+export class SchemaBuilder {
+    constructor(type, _props) {
+        if (type !== "table") {
+            this.result = { type };
+            this.result.__proto__ = createProto(type, this.result);
+        } else {
+            this.result = { type, _props };
+            this.result.__proto__ = createSchemaProto(this.result);
+        }
+    }
+
+    static table(props) {
+        return new SchemaBuilder("table", props).result;
     }
 
     static get string() {
-        return new SB("string").result;
+        return new SchemaBuilder("string").result;
     }
 
     static get number() {
-        return new SB("number").result;
+        return new SchemaBuilder("number").result;
     }
     static get boolean() {
-        return new SB("boolean").result;
+        return new SchemaBuilder("boolean").result;
     }
     static get bigint() {
-        return new SB("bigint").result;
+        return new SchemaBuilder("bigint").result;
     }
     static get object() {
-        return new SB("object").result;
+        return new SchemaBuilder("object").result;
     }
     static get array() {
-        return new SB("array").result;
+        return new SchemaBuilder("array").result;
     }
 }
 
-const createExtendedNumberProto = (result) => ({});
+const createSchemaProto = (result) => ({
+    pk(keys) {
+        if (result.type !== "table") {
+            throw new SchemaError(errorMessage.for.pk.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_pk")) {
+            throw new SchemaError(errorMessage.for.pk.when.alreadyAdded);
+        }
+        if (keys === undefined) {
+            throw new SchemaError(errorMessage.for.pk.when.undefinedValue);
+        }
+        if (typeof keys !== "string" && keys.constructor.name !== "Array") {
+            throw new SchemaError(errorMessage.for.pk.when.invalidValue);
+        }
+        const propsKeys = Object.keys(result._props);
+
+        let keysArr = keys;
+
+        if (typeof keys === "string") {
+            keysArr = keys.split(" ");
+        }
+
+        keysArr = keysArr.map((key) => key.trim()).filter((key) => !!key);
+
+        for (const key of keysArr) {
+            if (!propsKeys.includes(key)) {
+                throw new SchemaError(errorMessage.for.pk.when.invalidKey(key));
+            }
+        }
+
+        return Object.assign(result, { _pk: keysArr });
+    },
+    extra() {
+        if (result.type !== "table") {
+            throw new SchemaError(errorMessage.for.extra.when.notApplicable);
+        }
+        if (Object.hasOwn(result, "_extra")) {
+            throw new SchemaError(errorMessage.for.extra.when.alreadyAdded);
+        }
+        return Object.assign(result, { _extra: true });
+    },
+});
 
 const createCommonProto = (result) => ({
     null() {
@@ -195,31 +245,33 @@ const createCommonProto = (result) => ({
     },
 });
 
-const createStringProto = (result) => ({
-    ...createCommonProto(result),
-});
+// Deprecated:
+// const createStringProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
-const createNumberProto = (result) => ({
-    ...createCommonProto(result),
-});
+// const createNumberProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
-const createBigintProto = (result) => ({
-    ...createCommonProto(result),
-});
+// const createBigintProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
-const createBooleanProto = (result) => ({
-    ...createCommonProto(result),
-});
+// const createBooleanProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
-const createObjectProto = (result) => ({
-    ...createCommonProto(result),
-});
+// const createObjectProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
-const createArrayProto = (result) => ({
-    ...createCommonProto(result),
-});
+// const createArrayProto = (result) => ({
+//     ...createCommonProto(result),
+// });
 
 const protos = {
+    schema: createSchemaProto,
     string: createCommonProto,
     number: createCommonProto,
     bigint: createCommonProto,
@@ -232,24 +284,24 @@ function createProto(type, result) {
     return protos[type](result);
 }
 
-// console.log(SB.string);
-// console.log(SB.string.null());
-// console.log(SB.string.regexp("/.^/"));
-// console.log(SB.string.default().fn());
+// console.log(SchemaBuilder.string);
+// console.log(SchemaBuilder.string.null());
+// console.log(SchemaBuilder.string.regexp("/.^/"));
+// console.log(SchemaBuilder.string.default().fn());
 
 // console.log();
 
-// console.log(SB.number);
-// console.log(SB.number.null());
-// console.log(SB.number.default().fn());
-// console.log(SB.number.increment());
-// console.log(SB.number.decrement());
+// console.log(SchemaBuilder.number);
+// console.log(SchemaBuilder.number.null());
+// console.log(SchemaBuilder.number.default().fn());
+// console.log(SchemaBuilder.number.increment());
+// console.log(SchemaBuilder.number.decrement());
 
 // console.log();
 
-// console.log(SB.boolean.toggle());
-// console.log(SB.boolean.null());
-// console.log(SB.boolean.default().fn());
+// console.log(SchemaBuilder.boolean.toggle());
+// console.log(SchemaBuilder.boolean.null());
+// console.log(SchemaBuilder.boolean.default().fn());
 
 // ![
 //     "string",

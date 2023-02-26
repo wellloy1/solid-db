@@ -71,5 +71,21 @@ export const errorMessage = {
                 invalidValue: `The 'items' option must be a type of 'object' which is a valid SB schema.`,
             },
         },
+        pk: {
+            when: {
+                notApplicable: `The 'pk' option is applicable for the 'schema' type.`,
+                alreadyAdded: `You have been already added a 'pk' option`,
+                undefinedValue: `Option 'pk' required one argument which is an 'array' of keys or 'string' with keys separated by spaces.`,
+                invalidValue: `The 'pk' option must be an 'array' of keys or 'string' with keys separated by spaces.`,
+                invalidKey: (key) =>
+                    `The primary key ('${key}') that you specified does not exist in the current schema.`,
+            },
+        },
+        extra: {
+            when: {
+                notApplicable: `The 'extra' option is applicable for the 'schema' type.`,
+                alreadyAdded: `You have been already added an 'extra' option`,
+            },
+        },
     },
 };

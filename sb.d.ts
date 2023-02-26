@@ -2,14 +2,20 @@ declare class SchemaError extends Error {
     constructor(message: string);
 }
 
-export declare class SB {
+export declare class SchemaBuilder {
     [result: symbol]: any;
+    static table(obj: ObjectPropsSchema): TableSchema;
     static readonly string: StringSchema;
     static readonly number: NumberSchema;
     static readonly boolean: BooleanSchema;
     static readonly bigint: BigintSchema;
     static readonly object: ObjectSchema;
     static readonly array: ArraySchema;
+}
+
+export interface TableSchema {
+    pk(keys: string | string[]): TableSchema;
+    extra(): TableSchema;
 }
 
 export interface StringSchema {
@@ -81,7 +87,7 @@ export interface ObjectPropsSchema {
 }
 
 // Generated schemas:
-export interface SBResult {
+export interface SchemaBuilderResult {
     type: "string" | "number" | "bigint" | "boolean" | "object" | "array";
     _default?: any;
     _null?: true;
