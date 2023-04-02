@@ -1,4 +1,4 @@
-import { SB } from "../../sb.js";
+import { SchemaBuilder as SB } from "../../lib/schemaBuilder.js";
 
 describe("SB: create 'type' property", () => {
     test("1: creates a string type", () => {

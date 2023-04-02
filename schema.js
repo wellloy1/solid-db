@@ -1,11 +1,4 @@
-import { SchemaBuilder as SB } from "./sb.js";
-
-const data = {
-    x: SB.boolean,
-    y: SB.number,
-    width: SB.number,
-    height: SB.number,
-};
+import { SchemaBuilder as SB } from "./lib/schemaBuilder.js";
 
 export const schema1 = {
     props: {
@@ -27,15 +20,6 @@ export const schema2 = SB.table({
     data: SB.object.props({
         id: SB.number.fn(Date.now),
     }),
-});
-
-export const schema2 = SB.createSchema((schema) => {
-    schema.number("id").fn(Date.now);
-    schema.boolean("registered");
-    schema.string("comment").default("No comment");
-    schema.object("data").props({
-        id: SB.number.fn(Date.now),
-    });
 });
 
 console.log(schema1);

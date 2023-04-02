@@ -1,5 +1,5 @@
-import { SB } from "../../sb.js";
-import { errorMessage } from "../../errorMessage.js";
+import { SchemaBuilder as SB } from "../../lib/schemaBuilder.js";
+import { errorMessage } from "../../lib/schemaErrorMessage.js";
 
 describe("SB: expect to get an errors", () => {
     // should throw an error if/when:
